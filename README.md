@@ -1,7 +1,44 @@
 mlopszoomcamp_finalproject
 ==============================
 
-This a final project for MLOps Zoomcamp Course
+This a final project for MLOps Zoomcamp Course.
+The aim is to build an automatic pipeline for building, deploying a model to predict a heart stroke of a patient.
+The model is built using heart stroke data from here: https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset.
+
+Dataset description
+-------------------
+For a patient X the following information is known (names of the corresponding variables are self-explanatory): 
+* gender
+* age 
+* hypertension
+* heart_disease
+* ever_married
+* work_type
+* Residence_type
+* avg_glucose_level
+* bmi
+* smoking_status 
+* stroke.
+
+Problem setting
+---------------
+In this dataset we choose **stroke** (variable that indicates, whether a patient had a heart stroke) as a **target variable** and use the above variables as feature variables to predict it.
+So we are interested in a binary classification problem. Since we want to determine as many as possible patients that will likely have a heart attack the metrics we want to optimize is recall. 
+At the same time the classificator ought to have at least 15% of precision o avoid a trivial classificator. In this case we sacrifice precision to get a larger recall in a recall-precision trade-off.
+
+Technical implementation
+------------------------
+Using the classificator we build a Web Service with an endpoint to predict whether a new patient with known data will possibly have a heart attack.
+
+Summary
+-------
+Using gender, age , hypertension , heart_disease, ever_married , work_type, residence_type, avg_glucose_level, bmi, smoking_status predict whether a patient gets heart stroke. The classificator should have large recall and reasonable precision, moreover it should be served as Flask Web application.
+
+**DISCLAIMER:**  I am not a doctor to qualitatively evaluate a model.
+
+**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable" 
+classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures. 
+
 
 Project Organization
 ------------
