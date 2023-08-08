@@ -19,7 +19,13 @@ endif
 #################################################################################
 # COMMANDS                                                                      #
 #################################################################################
-
+## Build Docker Container
+build_prefect_docker:
+	docker build -t prefect_development:v1 -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
+build_mlflow_docker:
+	docker build -t mlflow_service:v1 -f dockerized_service_definitions/mlflow_service/Dockerfile .
+build_web_service_docker:
+	docker build -t heart-stroke-prediction-service:v1 -f dockerized_service_definitions/web_service/Dockerfile .
 ## Install Python Dependencies
 requirements: test_environment
 	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel

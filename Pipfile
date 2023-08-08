@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-src = {editable = true, file = "file:///home/taras/mlopszoomcamp_finalproject"}
 click = "*"
 sphinx = "*"
 coverage = "*"
@@ -14,6 +13,12 @@ python-dotenv = ">=0.5.1"
 pandas = "*"
 scikit-learn = "*"
 flask = "*"
+mlflow = "*"
+prefect = "*"
+requests = "*"
+gunicorn = "*"
+lightgbm = "*"
+boto3 = "*"
 
 [dev-packages]
 jupyter = "*"
@@ -22,6 +27,7 @@ xlrd = "*"
 matplotlib = "*"
 imblearn = "*"
 lightgbm = "*"
+localstack = "*"
 
 [requires]
 python_version = "3.9"
