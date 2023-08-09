@@ -20,8 +20,10 @@ endif
 # COMMANDS                                                                      #
 #################################################################################
 ## Build Docker Container
-build_prefect_docker:
-	docker build -t prefect_development:v1 -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
+build_prefect_development_docker:
+	docker build -t prefect_development_environment:v1 -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
+build_prefect_execution_docker:
+	docker build -t prefect_execution_environment:v1 -f dockerized_service_definitions/prefect_execution_environment/Dockerfile .
 build_mlflow_docker:
 	docker build -t mlflow_service:v1 -f dockerized_service_definitions/mlflow_service/Dockerfile .
 build_web_service_docker:

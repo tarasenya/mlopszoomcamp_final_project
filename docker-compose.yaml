@@ -26,7 +26,8 @@ services:
     depends_on:
       - s3
     restart: "no"
-    entrypoint: [ "sh", "-c", "sleep 10 && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/healthcare-dataset-stroke-data.csv s3://heart-stroke-data " ]
+    entrypoint: [ "sh", "-c", "sleep 10 && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/initial_heart_stroke_data.csv s3://heart-stroke-data 
+    && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/heart_stroke_2023-08-08.csv s3://heart-stroke-data" ]
     networks:
       - internal
   mlflow_service:
@@ -62,12 +63,12 @@ services:
   prefect_server:
     image: prefecthq/prefect:2.11.3-python3.9
     restart: always
-#    healthcheck:
-#      test: wget --no-verbose --tries=1 --spider http://prefect_server:4200/api/health || exit 1
-#      interval: 10s
-#      retries: 3
-#      start_period: 20s
-#      timeout: 5s
+    #    healthcheck:
+    #      test: wget --no-verbose --tries=1 --spider http://prefect_server:4200/api/health || exit 1
+    #      interval: 10s
+    #      retries: 3
+    #      start_period: 20s
+    #      timeout: 5s
     volumes:
       - prefect:/root/.prefect
     entrypoint: [ "/opt/prefect/entrypoint.sh","prefect", "server", "start" ]
@@ -87,10 +88,12 @@ services:
       - internal
       - public
   ## Prefect Execution Environment
-  execution_environment:
-    image: prefecthq/prefect:2.11.3-python3.9
+  prefect_execution_environment:
+    image: prefect_execution_environment:v1
     restart: always
     entrypoint: [ "/opt/prefect/entrypoint.sh", "prefect", "worker", "start", "-p", "general_worker", "-t", "process" ]
+    volumes:
+      - ./src:/app/src
     depends_on:
       prefect_server:
         condition: service_started
@@ -98,17 +101,21 @@ services:
       - AWS_ACCESS_KEY_ID=abc
       - AWS_SECRET_ACCESS_KEY=xyz
       - AWS_DEFAULT_REGION=eu-west-1
-      - MLFLOW_S3_ENDPOINT_URL=http://s3:4566
       - PREFECT_API_URL=http://prefect_server:4200/api
+      - MLFLOW_HOST=http://mlflow_service:5000
+      - MLFLOW_S3_ENDPOINT_URL=http://s3:4566
+      - S3_BUCKET_URL=http://s3:4566/
     networks:
       - internal
-  prefect_development:
-    image: prefect_development:v1
+  prefect_development_environment:
+    image: prefect_development_environment:v1
     depends_on:
       - prefect_server
+    volumes:
+      - ./src:/app/src
     restart: "no"
     tty: true
-    entrypoint: [ "sh", "-c", "cd src/models && python model_training_flows.py" ]
+    entrypoint: [ "sh", "-c", "sh flows_orchestration_scripts.sh" ]
     environment:
       - AWS_ACCESS_KEY_ID=abc
       - AWS_SECRET_ACCESS_KEY=xyz
@@ -124,10 +131,13 @@ services:
     restart: always
     image: heart-stroke-prediction-service:v1
     depends_on:
-      prefect_development:
+      prefect_development_environment:
         condition:
           service_completed_successfully
       mlflow_service:
+        condition:
+          service_started
+      prefect_execution_environment:
         condition:
           service_started
     ports:

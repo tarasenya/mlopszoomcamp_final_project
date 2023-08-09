@@ -81,7 +81,8 @@ def train_model(params: dict, data: pd.DataFrame,
         mlflow.log_metric('recall_0', recall_0)
         mlflow.log_metric('precision_0', precision_0)
         mlflow.sklearn.log_model(final_pipeline, 'model', registered_model_name="HeartStroke",
-                                 conda_env=conda_env, code_paths=['..'])
+                                 conda_env=conda_env,
+                                 code_paths=[os.path.dirname(os.path.dirname(os.path.realpath(__file__)))])
         print('Model has been logged')
     shutil.rmtree(temp_dir_path)
     return run_id
@@ -99,7 +100,7 @@ def register_model(run_id: str, tracking_server_host: str, model_name: str) -> s
 
 @flow(name="TrainInitialModel")
 def train_initial_model():
-    data = get_data('healthcare-dataset-stroke-data.csv')
+    data = get_data('initial_heart_stroke_data.csv')
     _initial_parameters = {'boosting_type': 'gbdt',
                            'class_weight': 'balanced',
                            'colsample_bytree': 1.0,

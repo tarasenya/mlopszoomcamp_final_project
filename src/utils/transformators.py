@@ -7,7 +7,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OrdinalEncoder
 
-from src.models.constants import CAT_COLS, NUM_COLS
+from src.utils.constants import CAT_COLS, NUM_COLS
 from src.utils.categorical_column_transformators import define_category_transformer, CreateCategoricalCutColumnForColumn
 
 

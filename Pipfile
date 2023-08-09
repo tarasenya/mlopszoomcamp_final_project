@@ -19,6 +19,7 @@ requests = "*"
 gunicorn = "*"
 lightgbm = "*"
 boto3 = "*"
+evidently = "*"
 
 [dev-packages]
 jupyter = "*"

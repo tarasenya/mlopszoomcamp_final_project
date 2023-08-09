@@ -12,5 +12,6 @@ RUN pipenv install --system --deploy
 COPY [ "/src/web_service/prediction_web_service.py", "./" ]
 
 EXPOSE 9696
+ENV PYTHONPATH /app
 
 ENTRYPOINT [ "gunicorn", "--bind=0.0.0.0:9696", "prediction_web_service:app" ]
