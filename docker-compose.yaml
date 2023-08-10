@@ -97,6 +97,12 @@ services:
     depends_on:
       prefect_server:
         condition: service_started
+    healthcheck:
+      test: curl --fail  http://mlflow_service:5000/api/2.0/mlflow/registered-models/get?name=HeartStroke || exit 1
+      interval: 1m
+      retries: 3
+      start_period: 1m
+      timeout: 10s
     environment:
       - AWS_ACCESS_KEY_ID=abc
       - AWS_SECRET_ACCESS_KEY=xyz
@@ -139,7 +145,7 @@ services:
           service_started
       prefect_execution_environment:
         condition:
-          service_started
+          service_healthy
     ports:
       - "9696:9696"
     environment:

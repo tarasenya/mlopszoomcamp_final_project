@@ -1,8 +1,11 @@
+"""
+Flask web service to serve a registered model using mlflow server
+"""
 import os
 
 import mlflow
 import pandas as pd
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from mlflow import MlflowClient
 from mlflow.pyfunc import PyFuncModel
 
@@ -23,14 +26,23 @@ app = Flask('heart-stroke-prediction')
 
 
 def predict(patient_info: dict, heartstroke_model: PyFuncModel) -> bool:
+    """
+    Using 'patient_info' dictionary with information about a patient predict whether he/she gets
+    a heart stroke
+    :patient_info: information with fields defined in the initial csv
+    :heartstroke_model: mlflow model defined in PyFuncModel flavour
+    """
     prediction = heartstroke_model.predict(pd.DataFrame(patient_info, index=[0]))
     return prediction[0] == 1
 
 
 @app.route('/predict', methods=['POST'])
 def predict_endpoint():
+    """
+    Prediction endpoint
+    """
     patient_info = request.get_json()
-    global model
+    global model  # pylint: disable=global-statement
 
     potential_new_run_id = client.get_latest_versions(MODEL_NAME)[0].run_id
     if potential_new_run_id != run_id:
@@ -39,8 +51,10 @@ def predict_endpoint():
 
     prediction = predict(patient_info, model)
 
-    result = {'risk_of_heart_attack': str(prediction),
-              'model_version': potential_new_run_id}
+    result = {
+        'risk_of_heart_attack': str(prediction),
+        'model_version': potential_new_run_id,
+    }
     print(result)
     return jsonify(result)
 

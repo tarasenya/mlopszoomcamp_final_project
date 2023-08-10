@@ -1,10 +1,22 @@
-from sklearn.metrics import recall_score, precision_score, accuracy_score, balanced_accuracy_score, confusion_matrix, \
-    classification_report
+"""
+Module to store classification metrics.
+"""
+from sklearn.metrics import (
+    recall_score,
+    accuracy_score,
+    precision_score,
+    confusion_matrix,
+    classification_report,
+    balanced_accuracy_score,
+)
 
 
 def calculate_metrics_for_classifier(clf, X, y) -> tuple[float, float, float, float]:
     """
-    Calculate metrics for a classifier
+    Calculate classification metrics for a classifier
+    X: matrix or DataFrame of features
+    y: list of classes
+    :return: recall and precisions of positive and negative classes.
     """
 
     y_predicted = clf.predict(X)
