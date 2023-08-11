@@ -92,6 +92,7 @@ def generate_report() -> None:
     current_heart_stroke_data = (
         f"heart_stroke_{datetime.today().strftime('%Y-%m-%d')}.csv"
     )
+
     initial_data = pd.read_csv(
         os.path.join(S3_BUCKET_URL, 'heart-stroke-data/initial_heart_stroke_data.csv')
     )

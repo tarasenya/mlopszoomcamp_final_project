@@ -13,9 +13,10 @@ from sklearn.metrics import (
 
 def calculate_metrics_for_classifier(clf, X, y) -> tuple[float, float, float, float]:
     """
-    Calculate classification metrics for a classifier
-    X: matrix or DataFrame of features
-    y: list of classes
+    Calculate classification metrics for a classifier, return recalls and precisions for labels.
+    printing some of them
+    :X: matrix or DataFrame of features
+    :y: list of classes
     :return: recall and precisions of positive and negative classes.
     """
 

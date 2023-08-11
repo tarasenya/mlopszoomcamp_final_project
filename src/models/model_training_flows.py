@@ -5,7 +5,8 @@ import os
 import pickle
 import shutil
 import tempfile
-from typing import Any
+from typing import Any, Union
+from datetime import datetime
 
 import mlflow
 import pandas as pd
@@ -17,8 +18,16 @@ from mlflow.tracking import MlflowClient
 from sklearn.pipeline import Pipeline
 
 from src.utils.metrics import calculate_metrics_for_classifier
-from src.utils.constants import HEART_STROKE_DATA
+from src.utils.constants import (
+    MODEL_NAME,
+    EXPERIMENT_NAME,
+    HEART_STROKE_DATA,
+    INITIAL_PARAMETERS_FOR_LGBM_CLF,
+)
 from src.utils.transformators import create_column_transformator
+
+MLFLOW_HOST = os.getenv('MLFLOW_HOST', 'http://0.0.0.0:5000')
+client = MlflowClient(MLFLOW_HOST)
 
 
 @task()
@@ -164,45 +173,32 @@ def train_initial_model():
     Prefect flow to train an initial model
     """
     data = get_data('initial_heart_stroke_data.csv')
-    _initial_parameters = {
-        'boosting_type': 'gbdt',
-        'class_weight': 'balanced',
-        'colsample_bytree': 1.0,
-        'importance_type': 'split',
-        'learning_rate': 0.01,
-        'max_depth': 10,
-        'min_child_samples': 10,
-        'min_child_weight': 0.001,
-        'min_split_gain': 0.0,
-        'n_estimators': 200,
-        'n_jobs': -1,
-        'num_leaves': 140,
-        'objective': None,
-        'random_state': 42,
-        'reg_alpha': 20,
-        'reg_lambda': 1,
-        'subsample': 0.7,
-        'subsample_for_bin': 200000,
-        'subsample_freq': 10,
-    }
-    _experiment_name = 'Heart Stroke'
-    _tracking_server_host = os.getenv('MLFLOW_HOST', 'http://0.0.0.0:5000')
     run_id = train_model(
-        _initial_parameters, data, _experiment_name, _tracking_server_host
+        INITIAL_PARAMETERS_FOR_LGBM_CLF, data, EXPERIMENT_NAME, MLFLOW_HOST
     )
-    client = MlflowClient(_tracking_server_host)
-    model_version = register_model(run_id, _tracking_server_host, 'HeartStroke')
+    model_version = register_model(run_id, MLFLOW_HOST, MODEL_NAME)
     client.transition_model_version_stage(
         name="HeartStroke", version=model_version, stage="Production"
     )
 
 
-# @flow()
-def retrain_model_using_new_data(path_to_new_data: pd.DataFrame):
+@flow(name='RetrainModel')
+def retrain_model_using_new_data(filename_new_data: Union[pd.DataFrame, None]):
     """
     Prefect flow to retrain a model using new data.
     """
-    print(path_to_new_data)
+    if not filename_new_data:
+        filename_new_data = f"heart_stroke_{datetime.today().strftime('%Y-%m-%d')}.csv"
+
+    data = get_data(filename_new_data)
+
+    run_id = train_model(
+        INITIAL_PARAMETERS_FOR_LGBM_CLF, data, EXPERIMENT_NAME, MLFLOW_HOST
+    )
+    model_version = register_model(run_id, MLFLOW_HOST, MODEL_NAME)
+    client.transition_model_version_stage(
+        name="HeartStroke", version=model_version, stage="Production"
+    )
 
 
 if __name__ == '__main__':
