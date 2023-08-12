@@ -8,7 +8,7 @@ from src.utils.metrics import calculate_metrics_for_classifier
 def test_calculate_metrics_for_classifier():
     """
     Check whether the output of 'calculate_metrics_for_classifier' is OK at least for
-    DummyClassifier
+    DummyClassifier (acting as a Mock).
     """
     X = [[1], [2], [3]]
     y = [0, 1, 0]
