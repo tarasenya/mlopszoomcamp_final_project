@@ -13,6 +13,10 @@ fi
 #    echo "no need to build image ${LOCAL_IMAGE_NAME}"
 #fi
 cd ../..
+set -a
+set -o allexport
+. .env
+set +a
 #docker build -t prefect_development_environment:v1 -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
 #docker build -t prefect_execution_environment:v1 -f dockerized_service_definitions/prefect_execution_environment/Dockerfile .
 #docker build -t mlflow_service:v1 -f dockerized_service_definitions/mlflow_service/Dockerfile .
@@ -32,7 +36,43 @@ if [ ${ERROR_CODE} != 0 ]; then
   exit ${ERROR_CODE}
 fi
 
-pg_isready --fail -d prefect -h localhost -p 548 -U postgresecho "Services down"
-curl http://localhost:5000/api/2.0/mlflow/experiments/search?max_results=2 || exit 1
+# Verify if the dedicated postgresql server is up. Commented because pg_isready util should be
+# installed on a server/computer to execute it, which is not pre assumed.
+# echo "Testing postgresql"
+# pg_isready --fail -d prod_db -h localhost -p 5432 -U postgres || exit 1
+#if [ ${ERROR_CODE} != 0 ]; then
+#  docker-compose logs
+#  docker-compose down
+#  exit ${ERROR_CODE}
+#fi
+# Verify if mlflow server is up and the dedicated experiment has been created
+echo "Testing mlflow"
+curl --fail http://localhost:5000/api/2.0/mlflow/registered-models/get?name=HeartStroke || exit 1
 
+if [ ${ERROR_CODE} != 0 ]; then
+  docker-compose logs
+  docker-compose down
+  exit ${ERROR_CODE}
+fi
+
+# Verify if prefect server is up and running
+echo "Testing prefect health"
+curl --fail http://localhost:4200/api/health || exit 1
+
+if [ ${ERROR_CODE} != 0 ]; then
+  docker-compose logs
+  docker-compose down
+  exit ${ERROR_CODE}
+fi
+
+# Testing S3 Bucket
+echo "Testing S3"
+pipenv run python tests/integration_tests/test_bucket.py
+if [ ${ERROR_CODE} != 0 ]; then
+  docker-compose logs
+  docker-compose down
+  exit ${ERROR_CODE}
+fi
+
+echo "Everything was fine. Services need to rest."
 docker-compose down

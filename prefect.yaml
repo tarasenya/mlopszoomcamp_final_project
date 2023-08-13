@@ -23,7 +23,7 @@ deployments:
     version: null
     tags: [ ]
     description: null
-    entrypoint: ./src/models/model_performance_flow.py:generate_report
+    entrypoint: ./src/flows/model_performance_flow.py:generate_report
     parameters: { }
     work_pool:
       name: general_worker
@@ -36,7 +36,7 @@ deployments:
     version: null
     tags: [ ]
     description: null
-    entrypoint: ./src/models/model_training_flows.py:train_initial_model
+    entrypoint: ./src/flows/model_training_flows.py:train_initial_model
     parameters: { }
     work_pool:
       name: general_worker
@@ -47,7 +47,7 @@ deployments:
     version: null
     tags: [ ]
     description: null
-    entrypoint: ./src/models/model_training_flows.py:retrain_model_using_new_data
+    entrypoint: ./src/flows/model_training_flows.py:retrain_model_using_new_data
     parameters: { }
     work_pool:
       name: general_worker

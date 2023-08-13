@@ -38,3 +38,15 @@ INITIAL_PARAMETERS_FOR_LGBM_CLF = {
     'subsample_for_bin': 200000,
     'subsample_freq': 10,
 }
+LIGHTGBM_PARAMETERS = {
+    'num_leaves': [50, 70, 80, 100, 120, 140, 160],
+    'max_depth': [3, 5, 7, 10, 15],
+    'learning_rate': [0.001, 0.01, 0.1, 1, 1.5, 2, 2.5],
+    'n_estimators': [50, 100, 200, 300, 400, 500, 600],
+    'class_weight': [{1: 18}, 'balanced'],
+    'min_child_samples': [5, 10, 20, 30, 40, 50, 60, 70, 80, 90],
+    'subsample': [1.0, 0.9, 0.7],
+    'subsample_freq': [10, 50, 100],
+    'reg_alpha': [0.001, 0.01, 0.1, 1, 5, 10, 15, 20],
+    'reg_lambda': [0.001, 0.01, 0.1, 1, 5, 10, 20, 25, 30],
+}

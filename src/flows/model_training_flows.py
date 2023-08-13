@@ -16,16 +16,18 @@ from prefect.flows import flow
 from prefect.tasks import task
 from mlflow.tracking import MlflowClient
 from sklearn.pipeline import Pipeline
+from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 
 from src.utils.metrics import calculate_metrics_for_classifier
 from src.utils.constants import (
     MODEL_NAME,
     EXPERIMENT_NAME,
     HEART_STROKE_DATA,
+    LIGHTGBM_PARAMETERS,
     INITIAL_PARAMETERS_FOR_LGBM_CLF,
 )
 from src.utils.transformators import create_column_transformator
-from src.models.model_performance_flow import (
+from src.flows.model_performance_flow import (
     do_we_need_to_retrain,
     generate_prediction_column,
 )
@@ -50,6 +52,7 @@ def get_data(data_name: str) -> pd.DataFrame:
 # @task()
 def train_model_using_hyperopt():
     """Training models using hyperopt"""
+    # TO DO: train a model using hyperopt
     print('Train')
 
 
@@ -75,12 +78,28 @@ def pipeline_transform(fitted_pipeline: Pipeline, data: pd.DataFrame) -> pd.Data
     return fitted_pipeline.transform(data)
 
 
-# @task()
-def quickly_perform_grid_search_cv():
+@task()
+def quickly_perform_grid_search_cv(data: pd.DataFrame, n_iter=300) -> dict:
     """
     Training model using RandomizedGridSearchCV
     """
-    print('Qucikly train')
+    feature_data, _ = pipeline_fit_transformation(data)
+    target_variable = data['stroke']
+
+    _lightgbm = LGBMClassifier(random_state=42, n_jobs=-1)
+
+    cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+    grid_cv = RandomizedSearchCV(
+        _lightgbm,
+        LIGHTGBM_PARAMETERS,
+        scoring='recall',
+        verbose=2,
+        cv=cv,
+        n_iter=n_iter,
+    )
+    grid_cv.fit(feature_data, target_variable)
+    print(f'Best score {grid_cv.best_score_}, best parameters {grid_cv.best_params_}')
+    return grid_cv.best_params_
 
 
 def pickling_obj(obj: Any) -> str:
@@ -199,6 +218,8 @@ def retrain_model_using_new_data(filename_new_data: Union[str, None]):
     data_with_predictions = generate_prediction_column(data)
     if do_we_need_to_retrain(initial_data_with_predictions, data_with_predictions):
         print('We need to retrain!')
+        # another possibility would be here to call 'quickly_perform_grid_search_cv' to find better
+        # hyperparameters for the future model and pass them to train_model below.
         run_id = train_model(
             INITIAL_PARAMETERS_FOR_LGBM_CLF, data, EXPERIMENT_NAME, MLFLOW_HOST
         )
