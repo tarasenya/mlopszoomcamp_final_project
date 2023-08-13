@@ -43,3 +43,16 @@ deployments:
       work_queue_name: null
       job_variables: { }
     schedule: null
+  - name: generate-retrain-deployment
+    version: null
+    tags: [ ]
+    description: null
+    entrypoint: ./src/models/model_training_flows.py:retrain_model_using_new_data
+    parameters: { }
+    work_pool:
+      name: general_worker
+      work_queue_name: null
+      job_variables: { }
+    schedule:
+      cron: 0 0 * * 1
+      timezone: America/Chicago

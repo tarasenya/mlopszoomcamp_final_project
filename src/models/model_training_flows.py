@@ -25,6 +25,10 @@ from src.utils.constants import (
     INITIAL_PARAMETERS_FOR_LGBM_CLF,
 )
 from src.utils.transformators import create_column_transformator
+from src.models.model_performance_flow import (
+    do_we_need_to_retrain,
+    generate_prediction_column,
+)
 
 MLFLOW_HOST = os.getenv('MLFLOW_HOST', 'http://0.0.0.0:5000')
 client = MlflowClient(MLFLOW_HOST)
@@ -182,23 +186,28 @@ def train_initial_model():
     )
 
 
-@flow(name='RetrainModel')
-def retrain_model_using_new_data(filename_new_data: Union[pd.DataFrame, None]):
+@flow(name='RetrainModel', log_prints=True)
+def retrain_model_using_new_data(filename_new_data: Union[str, None]):
     """
     Prefect flow to retrain a model using new data.
     """
     if not filename_new_data:
         filename_new_data = f"heart_stroke_{datetime.today().strftime('%Y-%m-%d')}.csv"
-
+    initial_data = get_data('initial_heart_stroke_data.csv')
     data = get_data(filename_new_data)
-
-    run_id = train_model(
-        INITIAL_PARAMETERS_FOR_LGBM_CLF, data, EXPERIMENT_NAME, MLFLOW_HOST
-    )
-    model_version = register_model(run_id, MLFLOW_HOST, MODEL_NAME)
-    client.transition_model_version_stage(
-        name="HeartStroke", version=model_version, stage="Production"
-    )
+    initial_data_with_predictions = generate_prediction_column(initial_data)
+    data_with_predictions = generate_prediction_column(data)
+    if do_we_need_to_retrain(initial_data_with_predictions, data_with_predictions):
+        print('We need to retrain!')
+        run_id = train_model(
+            INITIAL_PARAMETERS_FOR_LGBM_CLF, data, EXPERIMENT_NAME, MLFLOW_HOST
+        )
+        model_version = register_model(run_id, MLFLOW_HOST, MODEL_NAME)
+        client.transition_model_version_stage(
+            name="HeartStroke", version=model_version, stage="Production"
+        )
+    else:
+        print('No retraining needed')
 
 
 if __name__ == '__main__':

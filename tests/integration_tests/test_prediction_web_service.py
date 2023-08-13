@@ -21,3 +21,5 @@ predict_url = 'http://0.0.0.0:9696/predict'
 if __name__ == '__main__':
     response = requests.post(predict_url, json=test_patient_info, timeout=5)
     print(response.json())
+    assert 'model_version' in response.json()
+    assert 'risk_of_heart_attack' in response.json()

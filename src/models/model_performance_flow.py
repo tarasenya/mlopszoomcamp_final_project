@@ -20,6 +20,8 @@ from evidently.metrics import (
     ClassificationQualityByClass,
     ClassificationConfusionMatrix,
 )
+from evidently.test_suite import TestSuite
+from evidently.test_preset import BinaryClassificationTestPreset
 
 from src.utils.constants import (
     TARGET,
@@ -50,6 +52,25 @@ report = Report(
         ClassificationQualityByClass(),
     ]
 )
+
+
+@task(log_prints=True)
+def do_we_need_to_retrain(
+    initial_data: pd.DataFrame, current_data: pd.DataFrame
+) -> bool:
+    """
+    Runs 'BinaryClassificationTestPreset', if any of the test fails we need to retrain
+    :initial data: historical data
+    :current data: current data
+    :return: True if we need to retrain and False otherwise
+    """
+    test_binary_classification = TestSuite(tests=[BinaryClassificationTestPreset()])
+    test_binary_classification.run(
+        reference_data=initial_data,
+        current_data=current_data,
+        column_mapping=COLUMN_MAPPING,
+    )
+    return not test_binary_classification.as_dict()['summary']['all_passed']
 
 
 @task(log_prints=True)

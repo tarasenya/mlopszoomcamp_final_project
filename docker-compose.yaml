@@ -1,4 +1,5 @@
 services:
+  ### S3 Bucket
   s3:
     image: localstack/localstack
     ports:
@@ -12,6 +13,8 @@ services:
     networks:
       - internal
       - public
+  ### Container copies heart stroke data to 'heart-stroke-data' bucket after start and then is
+  # closed
   s3_initial_setup:
     image: localstack/localstack
     ports:
@@ -26,14 +29,28 @@ services:
     depends_on:
       - s3
     restart: "no"
-    entrypoint: [ "sh", "-c", "sleep 10 && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/initial_heart_stroke_data.csv s3://heart-stroke-data 
-    && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/heart_stroke_2023-08-08.csv s3://heart-stroke-data" ]
+    entrypoint: [ "sh", "-c", "sleep 10 && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/initial_heart_stroke_data.csv s3://heart-stroke-data
+    && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/heart_stroke_2023-08-12.csv s3://heart-stroke-data" ]
     networks:
       - internal
+  wait-for-db:
+    image: atkrad/wait4x
+    depends_on:
+      - database
+    command: tcp database:5432 -t 90s -i 250ms
+    networks:
+      - internal
+  ### Mlflow Service
   mlflow_service:
     image: mlflow_service:v1
     depends_on:
-      - s3_initial_setup
+      s3_initial_setup:
+        condition:
+          service_completed_successfully
+      wait-for-db:
+        condition: service_completed_successfully
+    # due to this issue https://github.com/conda/conda/issues/12287 with psycopg2 I could not connect mlflow to Postgres server using my python 3.9 env
+    # TO DO: test everything on python 3.10 and connect to postgres database
     entrypoint: mlflow server --host 0.0.0.0 --port 5000 --default-artifact-root s3://mlflow-artifacts/ --backend-store-uri sqlite:///mlflow.db
     ports:
       - "5000:5000"
@@ -45,13 +62,14 @@ services:
     networks:
       - internal
       - public
+  ### Postgres Database
   database:
     image: postgres:15.2-alpine
     restart: always
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=prefect
+      - POSTGRES_DB=prod_db
     expose:
       - 5432
     volumes:
@@ -63,12 +81,6 @@ services:
   prefect_server:
     image: prefecthq/prefect:2.11.3-python3.9
     restart: always
-    #    healthcheck:
-    #      test: wget --no-verbose --tries=1 --spider http://prefect_server:4200/api/health || exit 1
-    #      interval: 10s
-    #      retries: 3
-    #      start_period: 20s
-    #      timeout: 5s
     volumes:
       - prefect:/root/.prefect
     entrypoint: [ "/opt/prefect/entrypoint.sh","prefect", "server", "start" ]
@@ -76,10 +88,7 @@ services:
       - PREFECT_UI_URL=http://127.0.0.0:4200/api
       - PREFECT_API_URL=http://127.0.0.1:4200/api
       - PREFECT_SERVER_API_HOST=0.0.0.0
-      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:postgres@database:5432/prefect
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
-      - AWS_DEFAULT_REGION=eu-west-1
+      - PREFECT_API_DATABASE_CONNECTION_URL=postgresql+asyncpg://postgres:postgres@database:5432/prod_db
     ports:
       - "4200:4200"
     depends_on:
@@ -87,7 +96,7 @@ services:
     networks:
       - internal
       - public
-  ## Prefect Execution Environment
+  ### Prefect Execution Environment, here workers live
   prefect_execution_environment:
     image: prefect_execution_environment:v1
     restart: always
@@ -97,6 +106,8 @@ services:
     depends_on:
       prefect_server:
         condition: service_started
+      s3_initial_setup:
+        condition: service_completed_successfully
     healthcheck:
       test: curl --fail  http://mlflow_service:5000/api/2.0/mlflow/registered-models/get?name=HeartStroke || exit 1
       interval: 1m
@@ -113,10 +124,17 @@ services:
       - S3_BUCKET_URL=http://s3:4566/
     networks:
       - internal
+  ### Prefect development environment, here lives flows' code, the flow to train an initial model
+  # is started here as well-
   prefect_development_environment:
     image: prefect_development_environment:v1
     depends_on:
-      - prefect_server
+      prefect_server:
+        condition:
+          service_started
+      s3_initial_setup:
+        condition:
+          service_completed_successfully
     volumes:
       - ./src:/app/src
     restart: "no"
@@ -133,6 +151,7 @@ services:
     networks:
       - internal
       - public
+  ### Flask Web Service with one 'predict' endpoint
   web_service_prediction:
     restart: always
     image: heart-stroke-prediction-service:v1
@@ -157,6 +176,7 @@ services:
     networks:
       - internal
       - public
+
 volumes:
   prefect:
   db:

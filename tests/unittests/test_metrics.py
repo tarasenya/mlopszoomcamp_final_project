@@ -1,3 +1,6 @@
+"""
+Tests for calculate_metrics_for_classifier
+"""
 from unittest.mock import patch
 
 from sklearn.dummy import DummyClassifier
@@ -26,7 +29,7 @@ def test_calculate_metrics_for_classifier():
 @patch('src.utils.metrics.classification_report')
 @patch('src.utils.metrics.confusion_matrix')
 def test_calculate_metrics_for_classifier_func_were_called(
-        mock_confusion_matrix, mock_classification_report
+    mock_confusion_matrix, mock_classification_report
 ):
     """
     Check whether necessary functions are called

@@ -7,9 +7,9 @@ The model is built using heart stroke data from here: https://www.kaggle.com/dat
 
 Dataset description
 -------------------
-For a patient X the following information is known (names of the corresponding variables are self-explanatory): 
+For a patient X the following information is known (names of the corresponding variables are self-explanatory):
 * gender
-* age 
+* age
 * hypertension
 * heart_disease
 * ever_married
@@ -17,13 +17,13 @@ For a patient X the following information is known (names of the corresponding v
 * Residence_type
 * avg_glucose_level
 * bmi
-* smoking_status 
+* smoking_status
 * stroke.
 
 Problem setting
 ---------------
 In this dataset we choose **stroke** (variable that indicates, whether a patient had a heart stroke) as a **target variable** and use the above variables as feature variables to predict it.
-So we are interested in a binary classification problem. Since we want to determine as many as possible patients that will likely have a heart attack the metrics we want to optimize is recall. 
+So we are interested in a binary classification problem. Since we want to determine as many as possible patients that will likely have a heart attack the metrics we want to optimize is recall.
 At the same time the classificator ought to have at least 15% of precision o avoid a trivial classificator. In this case we sacrifice precision to get a larger recall in a recall-precision trade-off.
 
 Technical implementation
@@ -36,14 +36,13 @@ Using gender, age , hypertension , heart_disease, ever_married , work_type, resi
 
 **DISCLAIMER:**  I am not a doctor to qualitatively evaluate a model.
 
-**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable" 
-classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures. 
+**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable"
+classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures.
 
 
 Project Organization
 ------------
 
-    ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
     ├── README.md          <- The top-level README for developers using this project.
     ├── data
@@ -51,8 +50,6 @@ Project Organization
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
@@ -65,10 +62,8 @@ Project Organization
     ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
     │   └── figures        <- Generated graphics and figures to be used in reporting
     │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
+    ├── Pipfile            <-
+    ├── Pipfile.loc        <- The requirements file with version for reproducing the analysis environment
     ├── src                <- Source code for use in this project.
     │   ├── __init__.py    <- Makes src a Python module
     │   │
@@ -86,7 +81,7 @@ Project Organization
     │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
     │       └── visualize.py
     │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+    └── pyproject.tom            <- toml file to manage python projects
 
 
 --------

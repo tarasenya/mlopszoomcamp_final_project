@@ -20,6 +20,8 @@ gunicorn = "*"
 lightgbm = "*"
 boto3 = "*"
 evidently = "*"
+psycopg2-binary = "*"
+psycopg2 = "*"
 
 [dev-packages]
 jupyter = "*"
