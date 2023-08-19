@@ -5,7 +5,7 @@ import os
 import pickle
 import shutil
 import tempfile
-from typing import Any, Union
+from typing import Any
 from datetime import datetime
 
 import mlflow
@@ -206,7 +206,7 @@ def train_initial_model():
 
 
 @flow(name='RetrainModel', log_prints=True)
-def retrain_model_using_new_data(filename_new_data: Union[str, None]):
+def retrain_model_using_new_data(filename_new_data: str = None):
     """
     Prefect flow to retrain a model using new data.
     """

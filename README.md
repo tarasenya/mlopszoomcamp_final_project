@@ -50,7 +50,7 @@ Flask Web application.
 
 **DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable" classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures.
 
-
+We refer to /references for a deployment instructions and for the description of prefect flows.
 Project Organization
 ------------
 

@@ -43,11 +43,13 @@ def predict_endpoint():
     """
     patient_info = request.get_json()
     global model  # pylint: disable=global-statement
+    global run_id  # pylint: disable=global-statement
 
     potential_new_run_id = client.get_latest_versions(MODEL_NAME)[0].run_id
     if potential_new_run_id != run_id:
         new_logged_model = f'runs:/{potential_new_run_id}/model'
         model = mlflow.pyfunc.load_model(new_logged_model)
+        run_id = potential_new_run_id
 
     prediction = predict(patient_info, model)
 
