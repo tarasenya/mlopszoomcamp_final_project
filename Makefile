@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements sync_data_to_s3 sync_data_from_s3
+.PHONY: clean quality_checks setup
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -22,6 +22,11 @@ build_mlflow_docker:
 	docker build -t mlflow_service:v1 -f dockerized_service_definitions/mlflow_service/Dockerfile .
 build_web_service_docker:
 	docker build -t heart-stroke-prediction-service:v1 -f dockerized_service_definitions/web_service/Dockerfile .
+build_all_services:
+	docker build -t mlflow_service:v1 -f dockerized_service_definitions/mlflow_service/Dockerfile .
+	docker build -t prefect_development_environment:v1 -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
+	docker build -t prefect_execution_environment:v1 -f dockerized_service_definitions/prefect_execution_environment/Dockerfile .
+	docker build -t heart-stroke-prediction-service:v1 -f dockerized_service_definitions/web_service/Dockerfile .
 
 ## Delete all compiled Python files
 clean:
@@ -37,10 +42,3 @@ quality_checks:
 setup:
 	pipenv install --dev
 	pre-commit install
-
-#################################################################################
-# PROJECT                                                                #
-#################################################################################
-
-
-

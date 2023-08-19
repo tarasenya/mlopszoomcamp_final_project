@@ -2,12 +2,16 @@ mlopszoomcamp_finalproject
 ==============================
 
 This a final project for MLOps Zoomcamp Course.
-The aim is to build an automatic pipeline for building, deploying a model to predict a heart stroke of a patient.
-The model is built using heart stroke data from here: https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset.
+The aim is to build an automatic pipeline for building, deploying a model to predict a heart stroke
+of a patient.
+The model is built using heart stroke data from
+here: https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset.
 
 Dataset description
 -------------------
-For a patient X the following information is known (names of the corresponding variables are self-explanatory):
+For a patient X the following information is known (names of the corresponding variables are
+self-explanatory):
+
 * gender
 * age
 * hypertension
@@ -22,67 +26,72 @@ For a patient X the following information is known (names of the corresponding v
 
 Problem setting
 ---------------
-In this dataset we choose **stroke** (variable that indicates, whether a patient had a heart stroke) as a **target variable** and use the above variables as feature variables to predict it.
-So we are interested in a binary classification problem. Since we want to determine as many as possible patients that will likely have a heart attack the metrics we want to optimize is recall.
-At the same time the classificator ought to have at least 15% of precision o avoid a trivial classificator. In this case we sacrifice precision to get a larger recall in a recall-precision trade-off.
+In this dataset we choose **stroke** (variable that indicates, whether a patient had a heart stroke)
+as a **target variable** and use the above variables as feature variables to predict it.
+So we are interested in a binary classification problem. Since we want to determine as many as
+possible patients that will likely have a heart attack the metrics we want to optimize is recall.
+At the same time the classificator ought to have at least 15% of precision o avoid a trivial
+classificator. In this case we sacrifice precision to get a larger recall in a recall-precision
+trade-off.
 
 Technical implementation
 ------------------------
-Using the classificator we build a Web Service with an endpoint to predict whether a new patient with known data will possibly have a heart attack.
+Using the classificator we build a Web Service with an endpoint to predict whether a new patient
+with known data will possibly have a heart attack.
 
 Summary
 -------
-Using gender, age , hypertension , heart_disease, ever_married , work_type, residence_type, avg_glucose_level, bmi, smoking_status predict whether a patient gets heart stroke. The classificator should have large recall and reasonable precision, moreover it should be served as Flask Web application.
+Using gender, age , hypertension , heart_disease, ever_married , work_type, residence_type,
+avg_glucose_level, bmi, smoking_status predict whether a patient gets heart stroke. The
+classificator should have large recall and reasonable precision, moreover it should be served as
+Flask Web application.
 
 **DISCLAIMER:**  I am not a doctor to qualitatively evaluate a model.
 
-**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable"
-classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures.
+**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable" classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures.
 
 
 Project Organization
 ------------
 
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
+    ├── Makefile                <- Makefile with commands.
+    ├── README.md               <- The top-level README.
+    ├── pyproject.toml          <- toml file with project tools requirements.
+    ├── prefect.yaml            <- Prefect deployment settings.
+    ├── Pipfile                 <- project libraries requirements.
+    ├── Pipfile.lock            <- file that defines dependency tree.
+    ├── docker-compose.yaml     <- configuration file for docker compose that defines all the services.
+    ├── .pre-commit-config.yaml <- pre commit hooks configuration.
+    ├── .env                    <- files with environmental variables.
+    ├── tests
+    │   ├── integratioon_tests <- Tests related to a general integration tests.
+    │   ├── unittests          <- Unittests.
     ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
+    │   ├── interim            <- Intermediate data that has been transformed.
+    │   └── raw                <- The original, immutable data dump.
     │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
+    ├── models                       <- model summaries
     │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
+    ├── notebooks                    <- Jupyter notebooks for initial working with data
     │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
+    ├── references                   <- Deployment instructions, manuals and all other explanatory materials.
     │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── Pipfile            <-
-    ├── Pipfile.loc        <- The requirements file with version for reproducing the analysis environment
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
+    ├── src                          <- Source code for use in this project.
+    │   ├── __init__.py              <- Makes src a Python module
+    │   ├── flows                    <- Scripts dealting with prefect flows
+    │   │   └── model_prefomance_flow.py        <- contains flow and tasks that generates evidently reports for a model
+    │   │   └── model_training_flows.py         <- contains flow and tasks that execute (re)training of models
+    │   │   └── flows_orchestration_scripts.sh  <- bash scirpt for deployment and execution of prefect flows used in docker.
     │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
+    │   ├── utils                                     <- contains useful util scripts
     │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── pyproject.tom            <- toml file to manage python projects
-
+    │   ├── web_service                               <- Scripts to train models and then use trained models to make.
+    │   │   └──prediction_web_service.py <- flask web app to serve a prediction model.
+    ├── dockerized_service_definitions                <- contains Dockerfile for different services
+    │   ├── mlflow_service                            <- contains Dockerfile for mlflow server
+    │   ├── prefect_development_environment           <- contains Dockerfile for prefect development environment
+    │   ├── prefect_execution_environment             <- contains Dockerfile for prefect execution environment
+    ├── aws_scripts                                   <- scripts dealing with deployment to aws.
 
 --------
 
