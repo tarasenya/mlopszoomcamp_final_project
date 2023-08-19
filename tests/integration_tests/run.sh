@@ -5,14 +5,14 @@ set -a
 set -o allexport
 . .env
 set +a
-#docker build -t prefect_development_environment:v1 -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
-#docker build -t prefect_execution_environment:v1 -f dockerized_service_definitions/prefect_execution_environment/Dockerfile .
-#docker build -t mlflow_service:v1 -f dockerized_service_definitions/mlflow_service/Dockerfile .
-#docker build -t heart-stroke-prediction-service:v1 -f dockerized_service_definitions/web_service/Dockerfile .
+docker build -t prefect_development_environment:${DOCKER_IMAGE_TAG} -f dockerized_service_definitions/prefect_development_environment/Dockerfile .
+docker build -t prefect_execution_environment:${DOCKER_IMAGE_TAG} -f dockerized_service_definitions/prefect_execution_environment/Dockerfile .
+docker build -t mlflow_service:${DOCKER_IMAGE_TAG} -f dockerized_service_definitions/mlflow_service/Dockerfile .
+docker build -t heart-stroke-prediction-service:${DOCKER_IMAGE_TAG} -f dockerized_service_definitions/web_service/Dockerfile .
 
-#sleep 10
-#docker-compose up -d
-#sleep 60
+sleep 10
+docker-compose up -d
+sleep 60
 echo "Running prediction test"
 pipenv run python tests/integration_tests/test_prediction_web_service.py
 

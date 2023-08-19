@@ -5,9 +5,9 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
     volumes:
       - ./aws_scripts:/etc/localstack/init/ready.d
     networks:
@@ -20,17 +20,16 @@ services:
     ports:
       - "4567:6666"
     environment:
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
-      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - S3_ENDPOINT_URL=http://s3:4566/
     volumes:
       - ./data/raw:/tmp/localstack
     depends_on:
       - s3
     restart: "no"
-    entrypoint: [ "sh", "-c", "sleep 10 && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/initial_heart_stroke_data.csv s3://heart-stroke-data
-    && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/heart_stroke_2023-08-12.csv s3://heart-stroke-data" ]
+    entrypoint: [ "sh", "-c", "sleep 10 && aws --endpoint-url=$$S3_ENDPOINT_URL s3 cp /tmp/localstack/initial_heart_stroke_data.csv s3://heart-stroke-data" ]
     networks:
       - internal
   wait-for-db:
@@ -42,7 +41,7 @@ services:
       - internal
   ### Mlflow Service
   mlflow_service:
-    image: mlflow_service:v1
+    image: mlflow_service:${DOCKER_IMAGE_TAG}
     depends_on:
       s3_initial_setup:
         condition:
@@ -55,9 +54,9 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
-      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - MLFLOW_S3_ENDPOINT_URL=http://s3:4566
     networks:
       - internal
@@ -98,7 +97,7 @@ services:
       - public
   ### Prefect Execution Environment, here workers live
   prefect_execution_environment:
-    image: prefect_execution_environment:v1
+    image: prefect_execution_environment:${DOCKER_IMAGE_TAG}
     restart: always
     entrypoint: [ "/opt/prefect/entrypoint.sh", "prefect", "worker", "start", "-p", "general_worker", "-t", "process" ]
     volumes:
@@ -115,9 +114,9 @@ services:
       start_period: 1m
       timeout: 10s
     environment:
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
-      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - PREFECT_API_URL=http://prefect_server:4200/api
       - MLFLOW_HOST=http://mlflow_service:5000
       - MLFLOW_S3_ENDPOINT_URL=http://s3:4566
@@ -127,7 +126,7 @@ services:
   ### Prefect development environment, here lives flows' code, the flow to train an initial model
   # is started here as well-
   prefect_development_environment:
-    image: prefect_development_environment:v1
+    image: prefect_development_environment:${DOCKER_IMAGE_TAG}
     depends_on:
       prefect_server:
         condition:
@@ -141,9 +140,9 @@ services:
     tty: true
     entrypoint: [ "sh", "-c", "sh flows_orchestration_scripts.sh" ]
     environment:
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
-      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - PREFECT_API_URL=http://prefect_server:4200/api
       - MLFLOW_HOST=http://mlflow_service:5000
       - MLFLOW_S3_ENDPOINT_URL=http://s3:4566
@@ -154,7 +153,7 @@ services:
   ### Flask Web Service with one 'predict' endpoint
   web_service_prediction:
     restart: always
-    image: heart-stroke-prediction-service:v1
+    image: heart-stroke-prediction-service:${DOCKER_IMAGE_TAG}
     depends_on:
       prefect_development_environment:
         condition:
@@ -168,9 +167,9 @@ services:
     ports:
       - "9696:9696"
     environment:
-      - AWS_ACCESS_KEY_ID=abc
-      - AWS_SECRET_ACCESS_KEY=xyz
-      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - MLFLOW_HOST=http://mlflow_service:5000
       - MLFLOW_S3_ENDPOINT_URL=http://s3:4566
     networks:
