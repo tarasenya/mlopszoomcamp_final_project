@@ -48,9 +48,11 @@ Flask Web application.
 
 **DISCLAIMER:**  I am not a doctor to qualitatively evaluate a model.
 
-**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful. Indeed, if a "reasonable" classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures.
+**DISCLAIMER 2:** Even if a classificator has a small precision, it can be rather useful.
+Indeed, if a "reasonable" classificator says that a patient will have a heart stroke, it means that he/she probably resembles the ones that had a heart stroke, so perhaps one should more closely look at him and perform additional medicine procedures.
 
 We refer to /references for a deployment instructions and for the description of prefect flows.
+
 Project Organization
 ------------
 
@@ -81,11 +83,11 @@ Project Organization
     │   ├── flows                    <- Scripts dealting with prefect flows
     │   │   └── model_prefomance_flow.py        <- contains flow and tasks that generates evidently reports for a model
     │   │   └── model_training_flows.py         <- contains flow and tasks that execute (re)training of models
-    │   │   └── flows_orchestration_scripts.sh  <- bash scirpt for deployment and execution of prefect flows used in docker.
+    │   │   └── flows_orchestration_scripts.sh  <- bash script for deployment and execution of prefect flows used in docker.
     │   │
     │   ├── utils                                     <- contains useful util scripts
     │   │
-    │   ├── web_service                               <- Scripts to train models and then use trained models to make.
+    │   ├── web_service
     │   │   └──prediction_web_service.py <- flask web app to serve a prediction model.
     ├── dockerized_service_definitions                <- contains Dockerfile for different services
     │   ├── mlflow_service                            <- contains Dockerfile for mlflow server
